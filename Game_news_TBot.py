@@ -7,7 +7,7 @@ bot = telebot.TeleBot(TOKEN)
 
 
 users = []
-
+b = 1
 
 with open('users.pickle', 'rb') as f:
      users = pickle.load(f)
