@@ -45,15 +45,61 @@ def eVALORANT():
                 res_elements += elements[:elements.find('<')]
                 elements = elements[elements.find('<'):]
         eVALORANT_news.append(res_elements)
+
+    # Достаю заголовки и ссылки статей по Valorant
+    page = requests.get('https://www.playground.ru/valorant/news')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    elements = str(soup.find_all(class_='post-title'))
+    elements_copy = elements[1:len(elements) - 1]
+    res_elements = ''
+    VALORANT_title_list = []
+    VALORANT_link_list = []
+    while len(elements_copy) > 0:
+        if elements_copy[0] == '<':
+            elements_copy = elements_copy[elements_copy.find('>') + 1:]
+        else:
+            res_elements = elements_copy[:elements_copy.find('<')]
+            if (res_elements != '\n' and res_elements != ', '):
+                VALORANT_title_list.append(res_elements)
+            elements_copy = elements_copy[elements_copy.find('<'):]
+    VALORANT_title_list = VALORANT_title_list[0:10]
+    elements_copy = elements[1:len(elements) - 1]
+    while len(elements_copy) > 0:
+        if elements_copy.find('href="') == -1:
+            elements_copy = ''
+        else:
+            elements_copy = elements_copy[elements_copy.find('href="') + 6:]
+            res_elements = elements_copy[:elements_copy.find('"')]
+            VALORANT_link_list.append(res_elements)
+    VALORANT_link_list = VALORANT_link_list[0:10]
+
+    # Достаю статьи из VALORANT
+    VALORANT_news = []
+    for i in VALORANT_link_list:
+        page = requests.get(i)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        elements = str(soup.find_all(class_='article-content js-post-item-content'))
+        elements = elements[1:len(elements) - 1]
+        res_elements = ''
+        while len(elements) > 0:
+            if elements[0] == '<':
+                elements = elements[elements.find('>') + 1:]
+            else:
+                res_elements += elements[:elements.find('<')]
+                elements = elements[elements.find('<'):]
+        VALORANT_news.append(res_elements)
     #print('tick')
     threading.Timer(1800, eVALORANT).start()
-    res_list = [eVALORANT_title_list, eVALORANT_link_list, eVALORANT_news]
+    res_list = [eVALORANT_title_list, eVALORANT_link_list, eVALORANT_news, VALORANT_title_list, VALORANT_link_list, VALORANT_news]
     return res_list
 
 res_list = eVALORANT()
 eVALORANT_title_list = res_list[0]
 eVALORANT_link_list = res_list[1]
 eVALORANT_news = res_list[2]
+VALORANT_title_list = res_list[3]
+VALORANT_link_list = res_list[4]
+VALORANT_news = res_list[5]
 
 
 
@@ -131,6 +177,7 @@ def start(message):
             for j in range(len(themes_check_dict[message.chat.id])):
                 themes_check_dict[message.chat.id][j] = False
             bot. send_message(message.chat.id, f"Выберите игру, по которой я буду отбирать для вас новости:\n"
+                                               f"https://www.playground.ru/video/iframe/309169/?internal=1\n"
                                                f"VALORANT - /VALORANT")
             return
     bot.send_message(message.chat.id, f"Добро пожаловать в наш телеграм бот.\n"
@@ -236,13 +283,13 @@ def n10(message):
 #Команда для выхода на стартовое меню
 @bot.message_handler(commands=['exit'])
 def exit(message):
-    for i in range(len(game_check_dict[message.chat.id])):
-        game_check_dict[message.chat.id][i] = False
-    for i in range(len(themes_check_dict[message.chat.id])):
-        themes_check_dict[message.chat.id][i] = False
     userid = message.chat.id
     for i in users:
         if userid == int(i):
+            for i in range(len(game_check_dict[message.chat.id])):
+                game_check_dict[message.chat.id][i] = False
+            for i in range(len(themes_check_dict[message.chat.id])):
+                themes_check_dict[message.chat.id][i] = False
             bot.send_message(message.chat.id, f"Выберите игру, по которой я буду отбирать для вас новости:\n"
                                               f"VALORANT - /VALORANT")
             return
