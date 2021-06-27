@@ -46,7 +46,7 @@ def eVALORANT():
                 elements = elements[elements.find('<'):]
         eVALORANT_news.append(res_elements)
     #print('tick')
-    threading.Timer(120, eVALORANT).start()
+    threading.Timer(1800, eVALORANT).start()
     res_list = [eVALORANT_title_list, eVALORANT_link_list, eVALORANT_news]
     return res_list
 
@@ -85,6 +85,42 @@ for i in users:
     for j in themes_check_list:
         themes_check_dict[i].append(j)
 
+#список репортов
+report_list = []
+with open('report.pickle', 'rb') as f:
+    report_list = pickle.load(f)
+
+#Команда /help
+@bot.message_handler(commands=['help'])
+def help(message):
+    bot.send_message(message.chat.id, f'Приветствую Вас в нашем боте.\n'
+                                      f'В этом буте, буквально за пару кликов, Вы сможете узнать последние игровые новости, кторые вам интересны!\n'
+                                      f'Похоже Вы не знаете как пользоваться этим ботом. Позвольте я Вам всё разложу пополочкам) Вот список команд, которые поддерживает наш бот:\n'
+                                      f'/start - Главное меню. Тут Вы выбираете интересующую Вас игру, по которой Вы хотите узнать новости.\n'
+                                      f'/eSport - Данная команда будет доступна после выбора игры из команды /start. Она вам предложит список новостей. Рядом с новостью Вы увидете ее номер. Нажмите на него и получите желаемую статью.\n'
+                                      f'/report - Используте данную команду для отправки жалоб на баги и оштибки, с которыми Вы столкнулись. Отправлять жалобу через пробел в том же сообщении, где и вызываете эту команду.\n'
+                                      f'Если остались ещё вопросы или предложения, то напишите моему создателю. Получить его контакты можно с помощью команды /contacts\n'
+                                      f'Желаю Вам приятного пользования. Надеюсь теперь Вам будет легче и проще пользоваться ботом)')
+
+#Команда /report
+@bot.message_handler(commands=['report'])
+def report(message):
+    message_text = message.text
+    report_list.append(message_text)
+    with open('report.pickle', 'wb') as f:
+        pickle.dump(report_list, f)
+    bot.send_message(message.chat.id, "Благодарим за помощь в разработке. Мы обязательно рассмотрим ваше проблему и сделаем всё возможное для ее исправления.")
+    print(report_list)
+print(report_list)
+
+#Команда /contacts
+@bot.message_handler(commands=['contacts'])
+def contacts(message):
+    bot.send_message(message.chat.id, 'Контакты:\n'
+                                      'Мой VK - https://vk.com/vladgolovichpk\n'
+                                      'Почта - bot_gamer_info@mail.ru\n'
+                                      'ВНИМАНИЕ! Писать только по делу. Любой спам или информация, не косающаяся бота будет банится. Надеюсь на понимание)')
+
 #Команда /start и приветствие
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -99,7 +135,7 @@ def start(message):
                                                f"VALORANT - /VALORANT")
             return
     bot.send_message(message.chat.id, f"Добро пожаловать в наш телеграм бот.\n"
-                                      f"Тут вы сможете выбрать актуальные новости на нужные вам темы!\n"
+                                      f"Тут вы сможете выбрать актуальные игровые новости на нужные вам темы!\n"
                                       f"К сожалению, Вы ещё не зарегестрированы в системе(\n"
                                       f"Для регестрации введите команду - /reg")
 
@@ -111,13 +147,15 @@ def reg(message):
     userid = message.chat.id
     for i in users:
         if userid == int(i):
-            bot.send_message(message.chat.id, "Вы уже зарегестрированы. ")
+            bot.send_message(message.chat.id, "Вы уже зарегестрированы.\n"
+                                              "Для помощи напишите команду /help")
             return
 
     users.append(userid)
     bot.send_message(message.chat.id, f"Поздравляю, Вы успешно зарегстрировались в системе!\n" 
                                       f"Выберите игру, по которой я буду отбирать для вас новости:\n"
-                                      f"VALORANT - /VALORANT\n")
+                                      f"VALORANT - /VALORANT\n"
+                                      f"Для помощи напишите команду /help")
     with open('users.pickle', 'wb') as f:
         pickle.dump(users, f)
 
