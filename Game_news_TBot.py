@@ -3,44 +3,59 @@ import random
 import pickle
 import requests
 from bs4 import BeautifulSoup
+import threading
+
 
 TOKEN = '1855653370:AAGIJf1cj-QYeaS_6z1Ik8K4pFRakRZgI4E'
 bot = telebot.TeleBot(TOKEN)
 
-#Достаю заголовки и ссылки статей по киберспорту Valorant
-page = requests.get('https://rus.egamersworld.com/valorant/news')
-soup = BeautifulSoup(page.content, 'html.parser')
 eVALORANT_title_list = []
-eVALORANT_link_list = []
-soup = str(soup)
-def find_in_soup(st_start_copy, list):
-    soup_copy = soup
-    while soup_copy.find(st_start_copy) > -1:
-        soup_copy = soup_copy[soup_copy.find(st_start_copy) + len(st_start_copy):]
-        name = soup_copy[:soup_copy.find('"')]
-        list.append(name)
-        soup_copy = soup_copy[soup_copy.find('"'):]
-
-find_in_soup(',"title":"', eVALORANT_title_list)
-find_in_soup('"game_slug":"valorant","slug":"', eVALORANT_link_list)
-for i in range(2):
-    eVALORANT_title_list.pop(-1)
-
-#Достаю статьи из киберспорта VALORANT
-eVALORANT_news = []
-for i in eVALORANT_link_list:
-    page = requests.get('https://rus.egamersworld.com/valorant/news/' + i)
+def eVALORANT():
+    #Достаю заголовки и ссылки статей по киберспорту Valorant
+    page = requests.get('https://rus.egamersworld.com/valorant/news')
     soup = BeautifulSoup(page.content, 'html.parser')
-    elements = str(soup.find_all(class_='content'))
-    elements = elements[1:len(elements) - 1]
-    res_elements = ''
-    while len(elements) > 0:
-        if elements[0] == '<':
-            elements = elements[elements.find('>') + 1:]
-        else:
-            res_elements += elements[:elements.find('<')]
-            elements = elements[elements.find('<'):]
-    eVALORANT_news.append(res_elements)
+    eVALORANT_title_list = []
+    eVALORANT_link_list = []
+    soup = str(soup)
+    def find_in_soup(st_start_copy, list):
+        soup_copy = soup
+        while soup_copy.find(st_start_copy) > -1:
+            soup_copy = soup_copy[soup_copy.find(st_start_copy) + len(st_start_copy):]
+            name = soup_copy[:soup_copy.find('"')]
+            list.append(name)
+            soup_copy = soup_copy[soup_copy.find('"'):]
+
+    find_in_soup(',"title":"', eVALORANT_title_list)
+    find_in_soup('"game_slug":"valorant","slug":"', eVALORANT_link_list)
+    for i in range(2):
+        eVALORANT_title_list.pop(-1)
+
+    #Достаю статьи из киберспорта VALORANT
+    eVALORANT_news = []
+    for i in eVALORANT_link_list:
+        page = requests.get('https://rus.egamersworld.com/valorant/news/' + i)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        elements = str(soup.find_all(class_='content'))
+        elements = elements[1:len(elements) - 1]
+        res_elements = ''
+        while len(elements) > 0:
+            if elements[0] == '<':
+                elements = elements[elements.find('>') + 1:]
+            else:
+                res_elements += elements[:elements.find('<')]
+                elements = elements[elements.find('<'):]
+        eVALORANT_news.append(res_elements)
+    #print('tick')
+    threading.Timer(120, eVALORANT).start()
+    res_list = [eVALORANT_title_list, eVALORANT_link_list, eVALORANT_news]
+    return res_list
+
+res_list = eVALORANT()
+eVALORANT_title_list = res_list[0]
+eVALORANT_link_list = res_list[1]
+eVALORANT_news = res_list[2]
+
+
 
 #Создаю кючи проверки выбранных тем для каждого пользователя
 games_list = ['VALORANT']
