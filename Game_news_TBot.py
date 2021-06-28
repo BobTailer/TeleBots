@@ -323,20 +323,7 @@ def n10(message):
 #Команда для выхода на стартовое меню
 @bot.message_handler(commands=['exit'])
 def exit(message):
-    userid = message.chat.id
-    for i in users:
-        if userid == int(i):
-            for i in range(len(game_check_dict[message.chat.id])):
-                game_check_dict[message.chat.id][i] = False
-            for i in range(len(themes_check_dict[message.chat.id])):
-                themes_check_dict[message.chat.id][i] = False
-            bot.send_message(message.chat.id, f"Выберите игру, по которой я буду отбирать для вас новости:\n"
-                                              f"VALORANT - /VALORANT")
-            return
-    bot.send_message(message.chat.id, f"Добро пожаловать в наш телеграм бот.\n"
-                                      f"Тут вы сможете выбрать актуальные новости на нужные вам темы!\n"
-                                      f"К сожалению, Вы ещё не зарегестрированы в системе(\n"
-                                      f"Для регестрации введите команду - /reg")
+    start(message)
 
 
 if __name__ == '__main__':
