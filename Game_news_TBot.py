@@ -110,7 +110,7 @@ for i in range(len(games_list)):
     game_check_list.append(False)
 game_check_dict = {}
 
-themes_list = ['eSports']
+themes_list = ['eSports', 'game_news']
 themes_check_list = []
 for i in range(len(themes_list)):
     themes_check_list.append(False)
@@ -142,7 +142,8 @@ def help(message):
                                       f'В этом боте, буквально за пару кликов, Вы сможете узнать последние игровые новости, которые вам интересны!\n'
                                       f'Похоже Вы не знаете как пользоваться этим ботом. Позвольте я Вам всё разложу по полочкам) Вот список команд, которые поддерживает наш бот:\n'
                                       f'/start - Главное меню. Тут Вы выбираете интересующую Вас игру, по которой Вы хотите узнать новости.\n'
-                                      f'/eSport - Данная команда будет доступна после выбора игры из команды /start. Она вам предложит список новостей. Рядом с новостью Вы увидете ее номер. Нажмите на него и получите желаемую статью.\n'
+                                      f'/eSport - Данная команда будет доступна после выбора игры из команды /start. Она вам предложит список новостей из киберспорта. Рядом с новостью Вы увидете ее номер. Нажмите на него и получите желаемую статью.\n'
+                                      f'/game_news - Данная команда будет доступна после выбора игры из команды /start. Она вам предложит список игровых новостей. Рядом с новостью Вы увидете ее номер. Нажмите на него и получите желаемую статью.\n'
                                       f'/report - Используте данную команду для отправки жалоб на баги и ошибки, с которыми Вы столкнулись. Отправлять жалобу через пробел в том же сообщении, где и вызываете эту команду.\n'
                                       f'/exit - Выход на главное меню.\n'
                                       f'Если остались ещё вопросы или предложения, то напишите моему создателю. Получить его контакты можно с помощью команды /contacts\n'
@@ -177,7 +178,6 @@ def start(message):
             for j in range(len(themes_check_dict[message.chat.id])):
                 themes_check_dict[message.chat.id][j] = False
             bot. send_message(message.chat.id, f"Выберите игру, по которой я буду отбирать для вас новости:\n"
-                                               f"https://www.playground.ru/video/iframe/309169/?internal=1\n"
                                                f"VALORANT - /VALORANT")
             return
     bot.send_message(message.chat.id, f"Добро пожаловать в наш телеграм бот.\n"
@@ -213,19 +213,39 @@ def reg(message):
 #Команда /VALORANT
 @bot.message_handler(commands=['VALORANT'])
 def VALORANT(message):
+    for i in range(len(games_list)):
+        game_check_dict[message.chat.id][i] = False
     game_check_dict[message.chat.id][0] = True
     bot.send_message(message.chat.id, f"Вы выбрали игру VALORANT.\n"
                                       f"Выберите наиболее интересующую Вас тему:\n"
-                                      f"Киберспорт - /eSports")
+                                      f"Киберспорт - /eSports\n"
+                                      f"Игровые новости - /game_news\n"
+                                      f"\nГлавное меню - /exit")
 
 #Выибор киберспорта
 @bot.message_handler(commands=['eSports'])
 def eSports(message):
     if game_check_dict[message.chat.id][0] == True:
+        for i in range(len(themes_list)):
+            themes_check_dict[message.chat.id][i] = False
         themes_check_dict[message.chat.id][0] = True
         mes = 'Выберите новость из мира киберспорта:\n'
         for i in range(len(eVALORANT_title_list)):
             mes += f'{eVALORANT_title_list[i]} - /{i + 1}\n'
+        mes += '\nГлавное меню - /exit'
+        bot.send_message(message.chat.id, mes)
+
+#Выибор игровых новостей
+@bot.message_handler(commands=['game_news'])
+def game_news(message):
+    if game_check_dict[message.chat.id][0] == True:
+        for i in range(len(themes_list)):
+            themes_check_dict[message.chat.id][i] = False
+        themes_check_dict[message.chat.id][1] = True
+        mes = 'Выберите игровую новость:\n'
+        for i in range(len(VALORANT_title_list)):
+            mes += f'{VALORANT_title_list[i]} - /{i + 1}\n'
+        mes += '\nГлавное меню - /exit'
         bot.send_message(message.chat.id, mes)
 
 
@@ -233,52 +253,72 @@ def eSports(message):
 @bot.message_handler(commands=['1'])
 def n1(message):
     if themes_check_dict[message.chat.id][0] == True:
-        bot.send_message(message.chat.id, eVALORANT_news[0])
+        bot.send_message(message.chat.id, eVALORANT_news[0] + '\nГлавное меню - /exit')
+    if themes_check_dict[message.chat.id][1] == True:
+        bot.send_message(message.chat.id, VALORANT_news[0] + '\nГлавное меню - /exit')
 
 @bot.message_handler(commands=['2'])
 def n2(message):
     if themes_check_dict[message.chat.id][0] == True:
-        bot.send_message(message.chat.id, eVALORANT_news[1])
+        bot.send_message(message.chat.id, eVALORANT_news[1] + '\nГлавное меню - /exit')
+    if themes_check_dict[message.chat.id][1] == True:
+        bot.send_message(message.chat.id, VALORANT_news[1] + '\nГлавное меню - /exit')
 
 @bot.message_handler(commands=['3'])
 def n3(message):
     if themes_check_dict[message.chat.id][0] == True:
-        bot.send_message(message.chat.id, eVALORANT_news[2])
+        bot.send_message(message.chat.id, eVALORANT_news[2] + '\nГлавное меню - /exit')
+    if themes_check_dict[message.chat.id][1] == True:
+        bot.send_message(message.chat.id, VALORANT_news[2] + '\nГлавное меню - /exit')
 
 @bot.message_handler(commands=['4'])
 def n4(message):
     if themes_check_dict[message.chat.id][0] == True:
-        bot.send_message(message.chat.id, eVALORANT_news[3])
+        bot.send_message(message.chat.id, eVALORANT_news[3] + '\nГлавное меню - /exit')
+    if themes_check_dict[message.chat.id][1] == True:
+        bot.send_message(message.chat.id, VALORANT_news[3] + '\nГлавное меню - /exit')
 
 @bot.message_handler(commands=['5'])
 def n5(message):
     if themes_check_dict[message.chat.id][0] == True:
-        bot.send_message(message.chat.id, eVALORANT_news[4])
+        bot.send_message(message.chat.id, eVALORANT_news[4] + '\nГлавное меню - /exit')
+    if themes_check_dict[message.chat.id][1] == True:
+        bot.send_message(message.chat.id, VALORANT_news[4] + '\nГлавное меню - /exit')
 
 @bot.message_handler(commands=['6'])
 def n6(message):
     if themes_check_dict[message.chat.id][0] == True:
-        bot.send_message(message.chat.id, eVALORANT_news[5])
+        bot.send_message(message.chat.id, eVALORANT_news[5] + '\nГлавное меню - /exit')
+    if themes_check_dict[message.chat.id][1] == True:
+        bot.send_message(message.chat.id, VALORANT_news[5] + '\nГлавное меню - /exit')
 
 @bot.message_handler(commands=['7'])
 def n7(message):
     if themes_check_dict[message.chat.id][0] == True:
-        bot.send_message(message.chat.id, eVALORANT_news[6])
+        bot.send_message(message.chat.id, eVALORANT_news[6] + '\nГлавное меню - /exit')
+    if themes_check_dict[message.chat.id][1] == True:
+        bot.send_message(message.chat.id, VALORANT_news[6] + '\nГлавное меню - /exit')
 
 @bot.message_handler(commands=['8'])
 def n8(message):
     if themes_check_dict[message.chat.id][0] == True:
-        bot.send_message(message.chat.id, eVALORANT_news[7])
+        bot.send_message(message.chat.id, eVALORANT_news[7] + '\nГлавное меню - /exit')
+    if themes_check_dict[message.chat.id][1] == True:
+        bot.send_message(message.chat.id, VALORANT_news[7] + '\nГлавное меню - /exit')
 
 @bot.message_handler(commands=['9'])
 def n9(message):
     if themes_check_dict[message.chat.id][0] == True:
-        bot.send_message(message.chat.id, eVALORANT_news[8])
+        bot.send_message(message.chat.id, eVALORANT_news[8] + '\nГлавное меню - /exit')
+    if themes_check_dict[message.chat.id][1] == True:
+        bot.send_message(message.chat.id, VALORANT_news[8] + '\nГлавное меню - /exit')
 
 @bot.message_handler(commands=['10'])
 def n10(message):
     if themes_check_dict[message.chat.id][0] == True:
-        bot.send_message(message.chat.id, eVALORANT_news[9])
+        bot.send_message(message.chat.id, eVALORANT_news[9] + '\nГлавное меню - /exit')
+    if themes_check_dict[message.chat.id][1] == True:
+        bot.send_message(message.chat.id, VALORANT_news[9] + '\nГлавное меню - /exit')
 
 #Команда для выхода на стартовое меню
 @bot.message_handler(commands=['exit'])
