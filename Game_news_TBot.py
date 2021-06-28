@@ -88,9 +88,53 @@ def eVALORANT():
                 res_elements += elements[:elements.find('<')]
                 elements = elements[elements.find('<'):]
         VALORANT_news.append(res_elements)
+
+    # Достаю заголовки и ссылки патчей по Valorant
+    page = requests.get('https://xn--80aae1bleos.xn--p1ai/patch/')
+    soup = BeautifulSoup(page.content, 'html.parser')
+    elements = str(soup.find_all(class_='post-title entry-title'))
+    elements_copy = elements[1:len(elements) - 1]
+    res_elements = ''
+    VALORANT_Patch_title_list = []
+    VALORANT_Patch_link_list = []
+    while len(elements_copy) > 0:
+        if elements_copy[0] == '<':
+            elements_copy = elements_copy[elements_copy.find('>') + 1:]
+        else:
+            res_elements = elements_copy[:elements_copy.find('<')]
+            if (res_elements != '\n' and res_elements != ', '):
+                VALORANT_Patch_title_list.append(res_elements)
+            elements_copy = elements_copy[elements_copy.find('<'):]
+    VALORANT_Patch_title_list = VALORANT_Patch_title_list[0:1]
+    elements_copy = elements[1:len(elements) - 1]
+    while len(elements_copy) > 0:
+        if elements_copy.find('href="') == -1:
+            elements_copy = ''
+        else:
+            elements_copy = elements_copy[elements_copy.find('href="') + 6:]
+            res_elements = elements_copy[:elements_copy.find('"')]
+            VALORANT_Patch_link_list.append(res_elements)
+    VALORANT_Patch_link_list = VALORANT_Patch_link_list[0:1]
+
+    # Достаю патчи VALORANT
+    VALORANT_Patch_news = []
+    for i in VALORANT_Patch_link_list:
+        page = requests.get(i)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        elements = str(soup.find_all(class_='post-inner group'))
+        elements = elements[1:len(elements) - 1]
+        res_elements = ''
+        while len(elements) > 0:
+            if elements[0] == '<':
+                elements = elements[elements.find('>') + 1:]
+            else:
+                res_elements += elements[:elements.find('<')]
+                elements = elements[elements.find('<'):]
+        res_elements = res_elements[res_elements.find('Добавлен'):res_elements.find('Чуть менее краткий список изменений:')]
+        VALORANT_Patch_news.append(res_elements)
     #print('tick')
     threading.Timer(1800, eVALORANT).start()
-    res_list = [eVALORANT_title_list, eVALORANT_link_list, eVALORANT_news, VALORANT_title_list, VALORANT_link_list, VALORANT_news]
+    res_list = [eVALORANT_title_list, eVALORANT_link_list, eVALORANT_news, VALORANT_title_list, VALORANT_link_list, VALORANT_news, VALORANT_Patch_title_list, VALORANT_Patch_link_list, VALORANT_Patch_news]
     return res_list
 
 res_list = eVALORANT()
@@ -100,6 +144,9 @@ eVALORANT_news = res_list[2]
 VALORANT_title_list = res_list[3]
 VALORANT_link_list = res_list[4]
 VALORANT_news = res_list[5]
+VALORANT_Patch_title_list = res_list[6]
+VALORANT_Patch_link_list = res_list[7]
+VALORANT_Patch_news = res_list[8]
 
 
 
@@ -144,6 +191,7 @@ def help(message):
                                       f'/start - Главное меню. Тут Вы выбираете интересующую Вас игру, по которой Вы хотите узнать новости.\n'
                                       f'/eSport - Данная команда будет доступна после выбора игры из команды /start. Она вам предложит список новостей из киберспорта. Рядом с новостью Вы увидете ее номер. Нажмите на него и получите желаемую статью.\n'
                                       f'/game_news - Данная команда будет доступна после выбора игры из команды /start. Она вам предложит список игровых новостей. Рядом с новостью Вы увидете ее номер. Нажмите на него и получите желаемую статью.\n'
+                                      f'/Patch_Notes - Данная команда будет доступна после выбора игры из команды /start. Она покажет вам список изменений последнего патча выбранной игры.\n'
                                       f'/report - Используте данную команду для отправки жалоб на баги и ошибки, с которыми Вы столкнулись. Отправлять жалобу через пробел в том же сообщении, где и вызываете эту команду.\n'
                                       f'/exit - Выход на главное меню.\n'
                                       f'Если остались ещё вопросы или предложения, то напишите моему создателю. Получить его контакты можно с помощью команды /contacts\n'
@@ -220,6 +268,7 @@ def VALORANT(message):
                                       f"Выберите наиболее интересующую Вас тему:\n"
                                       f"Киберспорт - /eSports\n"
                                       f"Игровые новости - /game_news\n"
+                                      f"Изменения последнего патча - /Patch_Notes\n"
                                       f"\nГлавное меню - /exit")
 
 #Выибор киберспорта
@@ -248,6 +297,11 @@ def game_news(message):
         mes += '\nГлавное меню - /exit'
         bot.send_message(message.chat.id, mes)
 
+#Команда /Patch_Notes
+@bot.message_handler(commands=['Patch_Notes'])
+def Patch_Notes(message):
+    if game_check_dict[message.chat.id][0] == True:
+        bot.send_message(message.chat.id, VALORANT_Patch_news[0] + '\nГлавное меню - /exit')
 
 #Вывожу статью, которую выбрал пользователь
 @bot.message_handler(commands=['1'])
